@@ -1,0 +1,14 @@
+# Pastas Gigantes 
+LogicRAG/LogicRAG_Data/
+LogicRAG/track_in_kitti_test/
+LLaVA-SpaceSGG/dataset_pipeline/
+
+# Ambientes Virtuais
+lrag_mac/
+LogicRAG/lrag_mac/
+
+# Arquivos Compactados e Lixo do Mac
+*.zip
+*.tar.gz
+.DS_Store
+__MACOSX/
