@@ -1,0 +1,25 @@
+timestamp,facto_logicrag,resposta_llm
+2026-05-16T11:40:38.949709,Pedestrian detected at crosswalk. Distance: 5 meters. Ego-vehicle speed: 30km/h.,"The car should immediately apply maximum safe braking and stop before the crosswalk.
+
+It must yield to the pedestrian and remain stopped until the crosswalk is clear."
+2026-05-16T11:41:09.039234,Pedestrian detected at crosswalk. Distance: 5 meters. Ego-vehicle speed: 30km/h.,"The car should immediately apply emergency braking to stop before the crosswalk.
+
+It must yield to the pedestrian and only proceed once the crosswalk is fully clear."
+2026-05-16T11:42:25.636334,Pedestrian detected at crosswalk. Distance: 100 meters. Ego-vehicle speed: 30km/h.,"The car should continue driving but begin preparing to yield: monitor the pedestrian, reduce speed if needed, and plan to stop before the crosswalk.
+
+At 100 meters and 30 km/h, emergency braking is not required, but the vehicle must be ready to stop safely if the pedestrian is on or entering the crosswalk."
+2026-05-16T11:47:28.320384,Traffic light is RED. Distance: 15 meters. Ego-vehicle speed: 20km/h.,"The car should immediately decelerate and stop before the red traffic light/stop line.
+
+At 20 km/h and 15 meters away, it should brake smoothly but firmly, remain stopped, and proceed only when the light turns green and the path is clear."
+2026-05-16T11:50:01.600227,Pedestrian_1894 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_1941 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_2025 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_2026 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_2053 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_2088 detected at Left. Status: Standing and maintaining distance. | Pedestrian_2111 detected at Left. Status: Standing and maintaining distance.,"The car should immediately slow down and prepare to stop.
+
+Multiple pedestrians on the left are moving closer to the vehicle, so the car should increase caution, monitor their trajectories, maintain a safe lateral gap, and stop if any pedestrian may enter its path."
+2026-05-16T11:57:47.670597,Pedestrian_1894 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_1941 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_2025 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_2026 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_2053 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_2088 detected at Left. Status: Standing and maintaining distance. | Pedestrian_2111 detected at Left. Status: Standing and maintaining distance.,"The car should immediately reduce speed and be ready to stop.
+
+Because several pedestrians on the left are moving closer to the vehicle, it should keep a safe distance, avoid moving toward them, and stop if any pedestrian’s path could intersect with the vehicle’s path."
+2026-05-16T12:27:26.539834,Pedestrian_1894 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_1941 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_2025 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_2026 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_2053 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_2088 detected at Left. Status: Standing and maintaining distance. | Pedestrian_2111 detected at Left. Status: Standing and maintaining distance.,"The car should immediately slow down and prepare to stop.
+
+Several pedestrians on the left are moving closer to the vehicle, so it should maintain a safe lateral distance, avoid acceleration, and stop if any pedestrian may enter or approach its path."
+2026-05-16T13:19:56.436990,Pedestrian_1894 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_1941 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_2025 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_2026 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_2053 detected at Left. Status: Moving and getting closer to a vehicle. | Pedestrian_2088 detected at Left. Status: Standing and maintaining distance. | Pedestrian_2111 detected at Left. Status: Standing and maintaining distance.,"The car should immediately slow down, increase caution, and prepare to stop.
+
+Several pedestrians on the left are moving closer to the vehicle, so the car must not accelerate, should maintain maximum safe clearance, and should stop if their paths may intersect with the vehicle’s path."

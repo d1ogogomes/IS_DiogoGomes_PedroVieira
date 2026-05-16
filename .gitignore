@@ -1,3 +1,6 @@
+# Ficheiros de ambiente com chaves secretas
+.env
+
 # Pastas Gigantes 
 LogicRAG/LogicRAG_Data/
 LogicRAG/track_in_kitti_test/
