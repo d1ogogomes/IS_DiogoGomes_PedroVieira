@@ -1,0 +1,5 @@
+{
+    "image": "images_real/segunda_imagem_256.png",
+    "prompt": "Analyze the image and generate an open-vocabulary scene graph.\nReturn:\n1. A short scene description.\n2. Objects with normalized bounding boxes in this format: <ref>object</ref><box>[[x1, y1, x2, y2]]</box>.\n3. Spatial relations in this format: <pred>predicate</pred><box>[[subject_box]]</box><box>[[object_box]]</box>.\n4. Depth layers from closest to farthest.\n5. Four comparative question-answer pairs about object position, depth, or size.\nUse coordinates from 0 to 999. Be concise.",
+    "answer": "I can\u2019t analyze the scene because no image was provided.\n\nPlease upload the image, and I\u2019ll return:\n\n1. Short scene description  \n2. Objects with normalized boxes: `<ref>object</ref><box>[[x1, y1, x2, y2]]</box>`  \n3. Spatial relations: `<pred>predicate</pred><box>[[subject_box]]</box><box>[[object_box]]</box>`  \n4. Depth layers from closest to farthest  \n5. Four comparative Q&A pairs about position, depth, or size"
+}

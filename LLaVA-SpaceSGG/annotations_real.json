@@ -1,0 +1,10 @@
+{
+    "primeira_imagem": {
+        "image": "images_real/primeira_imagem.jpg",
+        "description": "A close-up photo of a happy black and tan dog outdoors. The dog's face fills most of the image, with its nose near the center, its mouth open, and its tongue hanging out toward the lower left. The background is green and blurred, suggesting grass or plants behind the dog."
+    },
+    "segunda_imagem": {
+        "image": "images_real/segunda_imagem.png",
+        "description": "A close-up photo of a white cat resting indoors. The cat's face fills most of the image, with large upright ears, a yellow left eye, a blue right eye, a pink nose near the center, and whiskers extending outward. A soft blanket or fabric appears behind and around the cat."
+    }
+}
