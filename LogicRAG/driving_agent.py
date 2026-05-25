@@ -54,8 +54,9 @@ def main():
     load_dotenv()
     api_key = os.getenv("OPENAI_API_KEY")
     api_endpoint = os.getenv("OPENAI_API_ENDPOINT")
+    channel_id = os.getenv("IAEDU_CHANNEL_ID")
 
-    if not api_key or not api_endpoint:
+    if not api_key or not api_endpoint or not channel_id:
         print("Error: Missing credentials in .env file.")
         return
 
@@ -76,7 +77,7 @@ Based on this fact, explain briefly and directly what the immediate action of th
     multipart_data = {
         "message": (None, prompt),
         "thread_id": (None, "logic_rag_test_01"),  # groups conversation context
-        "channel_id": (None, "cmp7g60732idwi601z8zo4l4t"),
+        "channel_id": (None, channel_id),
         "user_info": (None, "{}")
     }
 

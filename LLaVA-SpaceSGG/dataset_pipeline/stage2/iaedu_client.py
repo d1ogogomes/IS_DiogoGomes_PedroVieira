@@ -2,6 +2,7 @@ import json
 import mimetypes
 import os
 import re
+import http.client
 import urllib.error
 import urllib.request
 import uuid
@@ -149,7 +150,11 @@ def call_iaedu(message, channel_id, thread_id, user_info=None, endpoint=None, ap
 
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
-            raw = response.read().decode("utf-8", errors="replace")
+            try:
+                raw_bytes = response.read()
+            except http.client.IncompleteRead as error:
+                raw_bytes = error.partial
+            raw = raw_bytes.decode("utf-8", errors="replace")
     except urllib.error.HTTPError as error:
         detail = error.read().decode("utf-8", errors="replace")
         raise RuntimeError(f"IAedu API error {error.code}: {detail}") from error
