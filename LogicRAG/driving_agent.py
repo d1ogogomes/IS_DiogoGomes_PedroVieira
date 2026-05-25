@@ -4,6 +4,10 @@ import csv
 import requests
 from datetime import datetime
 from dotenv import load_dotenv
+from pathlib import Path
+
+
+BASE_DIR = Path(__file__).resolve().parent
 
 
 def obter_ultimo_facto_csv(caminho_ficheiro):
@@ -58,10 +62,10 @@ def main():
 
     if not api_key or not api_endpoint or not channel_id:
         print("Error: Missing credentials in .env file.")
-        return
+        return 1
 
     # read the latest detected scene fact from the LogicRAG output CSV
-    logic_rag_result = obter_ultimo_facto_csv("resultados_kitti.csv")
+    logic_rag_result = obter_ultimo_facto_csv(BASE_DIR / "resultados_kitti.csv")
     print(f"Fact extracted by LogicRAG: \n'{logic_rag_result}'\n")
 
     # give the LLM its role context, then drop in the scene fact
@@ -126,14 +130,17 @@ Based on this fact, explain briefly and directly what the immediate action of th
 
         # save input fact + LLM response to the history CSV
         resposta_texto = "".join(resposta_completa)
-        guardar_resposta_csv("logic_rag_response.csv", logic_rag_result, resposta_texto)
+        guardar_resposta_csv(BASE_DIR / "logic_rag_response.csv", logic_rag_result, resposta_texto)
         print("Resposta guardada em logic_rag_response.csv")
+        return 0
 
     except requests.exceptions.HTTPError as e:
         print(f"\nAPI Failure [{e.response.status_code}]: {e.response.text}")
+        return 1
     except Exception as e:
         print(f"\nError: {e}")
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
