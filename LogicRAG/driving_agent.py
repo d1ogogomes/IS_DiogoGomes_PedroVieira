@@ -59,6 +59,7 @@ def main():
     api_key = os.getenv("OPENAI_API_KEY")
     api_endpoint = os.getenv("OPENAI_API_ENDPOINT")
     channel_id = os.getenv("IAEDU_CHANNEL_ID")
+    thread_id = os.getenv("IAEDU_THREAD_ID") or f"logic_rag_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
     if not api_key or not api_endpoint or not channel_id:
         print("Error: Missing credentials in .env file.")
@@ -76,11 +77,12 @@ Our logic engine (LogicRAG) detected the following on the road:
 Based on this fact, explain briefly and directly what the immediate action of the car should be."""
 
     print("Sending data to API...\n")
+    print(f"Using IAedu thread: {thread_id}\n")
 
     # the iaedu.pt endpoint expects multipart/form-data, not JSON
     multipart_data = {
         "message": (None, prompt),
-        "thread_id": (None, "logic_rag_test_01"),  # groups conversation context
+        "thread_id": (None, thread_id),  # groups conversation context
         "channel_id": (None, channel_id),
         "user_info": (None, "{}")
     }
