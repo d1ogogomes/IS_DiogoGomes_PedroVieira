@@ -5,6 +5,11 @@ Projeto de demonstracao com dois fluxos de raciocinio visual:
 - **LogicRAG**: usa uma base de conhecimento pre-computada do KITTI, traduz factos em First-Order Logic para linguagem natural e envia o contexto para um agente IAedu.
 - **LLaVA-SpaceSGG**: envia uma imagem real para a API IAedu e recebe uma descricao estruturada com objetos, caixas, relacoes espaciais, camadas de profundidade e perguntas/respostas comparativas.
 
+Ambos os fluxos podem correr de duas formas, escolhidas pela variavel `LLM_BACKEND`:
+
+- `iaedu` (predefinicao): envia o pedido para a API IAedu na nuvem.
+- `ollama`: corre um modelo local atraves do Ollama (`llama3` para texto, `llava` para visao), sem internet nem chave de API.
+
 O objetivo do repositorio e deixar um fluxo reproduzivel para demonstracao, screenshots e apresentacao.
 
 ## Estrutura
@@ -19,6 +24,7 @@ O objetivo do repositorio e deixar um fluxo reproduzivel para demonstracao, scre
 +-- LLaVA-SpaceSGG/
 |   +-- dataset_pipeline/stage2/run_iaedu_image.py
 |   +-- dataset_pipeline/stage2/iaedu_client.py
+|   +-- dataset_pipeline/stage2/visualize_layers.py
 |   +-- images_real/
 |   +-- README.md
 +-- .gitignore
@@ -42,6 +48,7 @@ Criar um ficheiro `.env` dentro de `LogicRAG/`:
 OPENAI_API_KEY=colocar_a_chave_iaedu
 OPENAI_API_ENDPOINT=colocar_o_endpoint_stream_iaedu
 IAEDU_CHANNEL_ID=colocar_o_channel_id
+IAEDU_THREAD_ID=colocar_um_thread_id
 ```
 
 Criar um ficheiro `.env` dentro de `LLaVA-SpaceSGG/`:
@@ -149,6 +156,48 @@ Resultado esperado:
 
 - O script envia a imagem para o agente IAedu.
 - O output JSON contem uma descricao da imagem, objetos, bounding boxes, relacoes espaciais, camadas de profundidade e perguntas/respostas comparativas.
+
+Desenhar as camadas de profundidade sobre a imagem (precisa de `opencv-python`):
+
+```powershell
+python .\dataset_pipeline\stage2\visualize_layers.py --result-file .\resultados\teste_iaedu_image.json --output-file .\resultados\visualizacoes\teste_layers.png
+```
+
+Resultado esperado:
+
+- Le as `Layer N: <ref>...</ref><box>[[...]]</box>` do JSON e desenha cada caixa, com uma cor por camada de profundidade.
+- Guarda a imagem anotada no caminho indicado.
+- Nota: voltar a correr `visualize_layers.py` sempre que o JSON for regerado, senao a imagem fica dessincronizada do resultado.
+
+## Demo 3 (Alternativa): Inferencia Local com Ollama
+
+Em vez da nuvem IAedu, os dois fluxos podem correr com modelos locais via Ollama. Util para demonstrar sem internet nem chave de API.
+
+Preparar o Ollama (uma vez):
+
+```bash
+ollama serve            # arrancar o servidor local (fica a correr)
+ollama pull llama3      # modelo de texto para o LogicRAG
+ollama pull llava       # modelo de visao para o LLaVA-SpaceSGG
+```
+
+LogicRAG com Ollama (a partir de `LogicRAG/`):
+
+```bash
+LLM_BACKEND=ollama OLLAMA_MODEL=llama3 python driving_agent.py
+```
+
+LLaVA-SpaceSGG com Ollama (a partir de `LLaVA-SpaceSGG/`):
+
+```bash
+LLM_BACKEND=ollama OLLAMA_VISION_MODEL=llava python dataset_pipeline/stage2/run_iaedu_image.py --image images_real/primeira_imagem.png --output-file resultados/ollama_primeira.json
+```
+
+Notas:
+
+- `LLM_BACKEND` por omissao e `iaedu`; basta defini-la como `ollama` para alternar (no PowerShell usar `$env:LLM_BACKEND="ollama"`).
+- O modelo local `llava` da uma descricao mais solta e nao garante o formato estruturado de boxes 0-999 como a IAedu, por isso o resultado nao e identico ao da nuvem.
+- Em maquinas com pouca RAM, usar modelos mais leves (ex. `OLLAMA_MODEL=llama3.2:3b`).
 
 ## Verificacao Antes de Commit
 

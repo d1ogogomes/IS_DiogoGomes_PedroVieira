@@ -19,3 +19,5 @@ __pycache__/
 *.tar.gz
 .DS_Store
 __MACOSX/
+
+CONTEXTO.md
