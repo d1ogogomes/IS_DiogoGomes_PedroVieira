@@ -51,32 +51,29 @@ def guardar_resposta_csv(caminho_ficheiro, facto, resposta):
         escritor.writerow([datetime.now().isoformat(), facto, resposta])
 
 
-def main():
-    print("Starting LogicRAG + API Integration System...\n")
+def criar_prompt(logic_rag_result):
+    return f"""Responde em portugues de Portugal.
+Tarefa academica offline: classificar uma cena gravada do dataset KITTI.
+Isto nao controla um veiculo real e nao e aconselhamento operacional em tempo real.
 
-    # pull credentials from .env so we don't hardcode anything sensitive
-    load_dotenv()
-    api_key = os.getenv("OPENAI_API_KEY")
-    api_endpoint = os.getenv("OPENAI_API_ENDPOINT")
-    channel_id = os.getenv("IAEDU_CHANNEL_ID")
-    thread_id = os.getenv("IAEDU_THREAD_ID") or f"logic_rag_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+Escolhe uma das seguintes etiquetas de decisao de alto nivel:
+- STOP: parar ou preparar paragem imediata.
+- SLOW_DOWN: abrandar e manter vigilancia reforcada.
+- CONTINUE: continuar apenas se nao houver risco relevante.
 
-    if not api_key or not api_endpoint or not channel_id:
-        print("Error: Missing credentials in .env file.")
-        return 1
+Regras:
+- Se houver peoes a aproximar-se do veiculo, escolhe uma decisao conservadora.
+- Nao sugiras manobras evasivas ou desvio de trajetoria.
+- Responde apenas com a etiqueta escolhida e duas frases de justificacao.
 
-    # read the latest detected scene fact from the LogicRAG output CSV
-    logic_rag_result = obter_ultimo_facto_csv(BASE_DIR / "resultados_kitti.csv")
-    print(f"Fact extracted by LogicRAG: \n'{logic_rag_result}'\n")
-
-    # give the LLM its role context, then drop in the scene fact
-    prompt = f"""You are an intelligent assistant for an autonomous driving car.
-Our logic engine (LogicRAG) detected the following on the road:
+O motor logico LogicRAG detetou o seguinte facto na estrada:
 {logic_rag_result}
 
-Based on this fact, explain briefly and directly what the immediate action of the car should be."""
+Classifica a cena e justifica a decisao."""
 
-    print("Sending data to API...\n")
+
+def chamar_iaedu(prompt, api_key, api_endpoint, channel_id, thread_id):
+    print("Sending data to IAedu API...\n")
     print(f"Using IAedu thread: {thread_id}\n")
 
     # the iaedu.pt endpoint expects multipart/form-data, not JSON
@@ -87,51 +84,123 @@ Based on this fact, explain briefly and directly what the immediate action of th
         "user_info": (None, "{}")
     }
 
-    try:
-        response = requests.post(
-            api_endpoint,
-            headers={
-                "x-api-key": api_key  # iaedu uses x-api-key, not Bearer
+    response = requests.post(
+        api_endpoint,
+        headers={
+            "x-api-key": api_key  # iaedu uses x-api-key, not Bearer
+        },
+        files=multipart_data,
+        stream=True,  # response comes back as SSE chunks
+        timeout=60,
+    )
+
+    response.raise_for_status()
+
+    resposta_completa = []
+
+    # read SSE stream line by line and print tokens as they arrive
+    for line in response.iter_lines():
+        if not line:
+            continue
+        decoded = line.decode("utf-8")
+        if decoded.startswith("data: "):
+            decoded = decoded[len("data: "):]
+
+        try:
+            chunk = json.loads(decoded)
+            event_type = chunk.get("type")
+
+            if event_type == "token":
+                token = chunk.get("content", "")
+                if token:
+                    print(token, end="", flush=True)
+                    resposta_completa.append(token)
+            elif event_type == "done":
+                break  # server signals end of stream
+
+        except json.JSONDecodeError:
+            pass  # skip heartbeat lines or malformed chunks
+
+    return "".join(resposta_completa)
+
+
+def chamar_ollama(prompt):
+    model = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
+    endpoint = os.getenv("OLLAMA_ENDPOINT", "http://localhost:11434/api/generate")
+
+    print("Sending data to local Ollama model...\n")
+    print(f"Using Ollama model: {model}\n")
+
+    response = requests.post(
+        endpoint,
+        json={
+            "model": model,
+            "prompt": prompt,
+            "stream": True,
+            "options": {
+                "temperature": 0.2,
             },
-            files=multipart_data,
-            stream=True,  # response comes back as SSE chunks
-            timeout=60,
-        )
+        },
+        stream=True,
+        timeout=120,
+    )
 
-        response.raise_for_status()
+    response.raise_for_status()
 
+    resposta_completa = []
+    for line in response.iter_lines():
+        if not line:
+            continue
+
+        chunk = json.loads(line.decode("utf-8"))
+        token = chunk.get("response", "")
+        if token:
+            print(token, end="", flush=True)
+            resposta_completa.append(token)
+
+        if chunk.get("done"):
+            break
+
+    return "".join(resposta_completa).strip()
+
+
+def main():
+    print("Starting LogicRAG + LLM Integration System...\n")
+
+    # pull credentials from .env so we don't hardcode anything sensitive
+    load_dotenv()
+    llm_backend = os.getenv("LLM_BACKEND", "iaedu").strip().lower()
+    api_key = os.getenv("OPENAI_API_KEY")
+    api_endpoint = os.getenv("OPENAI_API_ENDPOINT")
+    channel_id = os.getenv("IAEDU_CHANNEL_ID")
+    thread_id = os.getenv("IAEDU_THREAD_ID") or f"logic_rag_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+
+    if llm_backend not in {"iaedu", "ollama"}:
+        print("Error: LLM_BACKEND must be 'iaedu' or 'ollama'.")
+        return 1
+
+    if llm_backend == "iaedu" and (not api_key or not api_endpoint or not channel_id):
+        print("Error: Missing credentials in .env file.")
+        return 1
+
+    # read the latest detected scene fact from the LogicRAG output CSV
+    logic_rag_result = obter_ultimo_facto_csv(BASE_DIR / "resultados_kitti.csv")
+    print(f"Fact extracted by LogicRAG: \n'{logic_rag_result}'\n")
+
+    prompt = criar_prompt(logic_rag_result)
+
+    try:
         print("Assistant Response:")
         print("-" * 50)
 
-        resposta_completa = []
-
-        # read SSE stream line by line and print tokens as they arrive
-        for line in response.iter_lines():
-            if not line:
-                continue
-            decoded = line.decode("utf-8")
-            if decoded.startswith("data: "):
-                decoded = decoded[len("data: "):]
-
-            try:
-                chunk = json.loads(decoded)
-                event_type = chunk.get("type")
-
-                if event_type == "token":
-                    token = chunk.get("content", "")
-                    if token:
-                        print(token, end="", flush=True)
-                        resposta_completa.append(token)
-                elif event_type == "done":
-                    break  # server signals end of stream
-
-            except json.JSONDecodeError:
-                pass  # skip heartbeat lines or malformed chunks
+        if llm_backend == "ollama":
+            resposta_texto = chamar_ollama(prompt)
+        else:
+            resposta_texto = chamar_iaedu(prompt, api_key, api_endpoint, channel_id, thread_id)
 
         print("\n" + "-" * 50)
 
         # save input fact + LLM response to the history CSV
-        resposta_texto = "".join(resposta_completa)
         guardar_resposta_csv(BASE_DIR / "logic_rag_response.csv", logic_rag_result, resposta_texto)
         print("Resposta guardada em logic_rag_response.csv")
         return 0
