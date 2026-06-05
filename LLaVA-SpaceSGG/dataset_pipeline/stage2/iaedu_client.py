@@ -1,7 +1,9 @@
+import base64
 import json
 import mimetypes
 import os
 import re
+import socket
 import http.client
 import urllib.error
 import urllib.request
@@ -10,6 +12,7 @@ from pathlib import Path
 
 
 DEFAULT_ENDPOINT = "https://api.iaedu.pt/agent-chat/api/v1/agent/cmor5objoex9gfp01vm7p95jh/stream"
+DEFAULT_OLLAMA_ENDPOINT = "http://localhost:11434/api/generate"
 
 
 def load_dotenv(env_path=None):
@@ -160,3 +163,54 @@ def call_iaedu(message, channel_id, thread_id, user_info=None, endpoint=None, ap
         raise RuntimeError(f"IAedu API error {error.code}: {detail}") from error
 
     return _parse_stream(raw)
+
+
+def call_ollama_vision(message, image_path, model=None, endpoint=None, timeout=None):
+    load_dotenv()
+    model = model or os.environ.get("OLLAMA_VISION_MODEL") or os.environ.get("OLLAMA_MODEL") or "llava"
+    endpoint = endpoint or os.environ.get("OLLAMA_ENDPOINT") or DEFAULT_OLLAMA_ENDPOINT
+    timeout = int(timeout or os.environ.get("OLLAMA_TIMEOUT", "600"))
+
+    path = Path(image_path)
+    if not path.exists():
+        raise FileNotFoundError(f"Image not found: {path}")
+
+    image_base64 = base64.b64encode(path.read_bytes()).decode("utf-8")
+    payload = {
+        "model": model,
+        "prompt": message,
+        "images": [image_base64],
+        "stream": True,
+    }
+
+    request = urllib.request.Request(
+        endpoint,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            parts = []
+            for raw_line in response:
+                if not raw_line:
+                    continue
+
+                payload = json.loads(raw_line.decode("utf-8", errors="replace"))
+                token = payload.get("response", "")
+                if token:
+                    print(token, end="", flush=True)
+                    parts.append(token)
+
+                if payload.get("done"):
+                    break
+    except urllib.error.HTTPError as error:
+        detail = error.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"Ollama API error {error.code}: {detail}") from error
+    except socket.timeout as error:
+        raise RuntimeError(
+            f"Ollama timed out after {timeout}s. Try a smaller image/prompt or set OLLAMA_TIMEOUT to a larger value."
+        ) from error
+
+    return "".join(parts).strip()

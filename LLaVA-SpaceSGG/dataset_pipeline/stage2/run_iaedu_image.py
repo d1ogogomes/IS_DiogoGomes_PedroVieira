@@ -6,9 +6,9 @@ from pathlib import Path
 
 if __package__ is None or __package__ == "":
     sys.path.append(str(Path(__file__).resolve().parents[1]))
-    from stage2.iaedu_client import call_iaedu, load_dotenv
+    from stage2.iaedu_client import call_iaedu, call_ollama_vision, load_dotenv
 else:
-    from .iaedu_client import call_iaedu, load_dotenv
+    from .iaedu_client import call_iaedu, call_ollama_vision, load_dotenv
 
 
 DEFAULT_PROMPT = """Analyze the image and generate an open-vocabulary scene graph.
@@ -22,7 +22,7 @@ Use coordinates from 0 to 999. Be concise."""
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run a real image through the IAedu agent API for scene graph generation.")
+    parser = argparse.ArgumentParser(description="Run a real image through IAedu or Ollama for scene graph generation.")
     parser.add_argument("--image", required=True, help="Path to an image file.")
     parser.add_argument("--output-file", default="image_sgg_output.json", help="Path to save the API output.")
     parser.add_argument("--prompt", default=DEFAULT_PROMPT, help="Prompt to send with the image.")
@@ -31,30 +31,41 @@ def main():
     args = parser.parse_args()
 
     load_dotenv()
+    llm_backend = os.environ.get("LLM_BACKEND", "iaedu").strip().lower()
     channel_id = args.channel_id or os.environ.get("IAEDU_CHANNEL_ID")
     thread_id = args.thread_id or os.environ.get("IAEDU_THREAD_ID") or "llava-spacesgg-image"
-    if not channel_id:
+    if llm_backend not in {"iaedu", "ollama"}:
+        raise RuntimeError("LLM_BACKEND must be 'iaedu' or 'ollama'.")
+    if llm_backend == "iaedu" and not channel_id:
         raise RuntimeError("Set --channel-id or IAEDU_CHANNEL_ID in .env.")
 
     image_path = Path(args.image)
     if not image_path.exists():
         raise FileNotFoundError(f"Image not found: {image_path}")
 
-    answer = call_iaedu(
-        message=args.prompt,
-        channel_id=channel_id,
-        thread_id=f"{thread_id}-{image_path.stem}",
-        user_info={},
-        image_path=image_path,
-    )
+    if llm_backend == "ollama":
+        answer = call_ollama_vision(
+            message=args.prompt,
+            image_path=image_path,
+        )
+    else:
+        answer = call_iaedu(
+            message=args.prompt,
+            channel_id=channel_id,
+            thread_id=f"{thread_id}-{image_path.stem}",
+            user_info={},
+            image_path=image_path,
+        )
     output = {
         "image": str(image_path),
         "prompt": args.prompt,
         "answer": answer,
     }
-    with open(args.output_file, "w") as file:
+    output_path = Path(args.output_file)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", encoding="utf-8") as file:
         json.dump(output, file, indent=4)
-    print(f"Saved output to {args.output_file}")
+    print(f"Saved output to {output_path}")
 
 
 if __name__ == "__main__":
