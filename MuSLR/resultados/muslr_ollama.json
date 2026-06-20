@@ -1,0 +1,7 @@
+{
+    "id": "demo_001",
+    "backend": "ollama",
+    "question": "Please determine whether the following action is valid (True/False/Unknown) based on the image and context: The driver should change lanes now.",
+    "gold_answer": "False",
+    "model_answer": "(1) The premises relevant to the image are:\n1. If driving straight is allowed, then there is no road construction. 2. On a two-way road with one lane per direction, if the driver must change lanes, the driver must wait for vehicles in the opposing lane to pass before changing lanes.\n\n(2) The reasoning type is \"conditional reasoning\" (if ... then ...).\n\n(3) Applying Modus Tollens (MT), we can conclude that if the driver must change lanes, it is not allowed to drive straight at this moment. Therefore, the final conclusion based on the image and context is:\nFINAL ANSWER: False"
+}
