@@ -1,11 +1,12 @@
 # IS_DiogoGomes_PedroVieira
 
-Projeto de demonstracao com dois fluxos de raciocinio visual:
+Projeto de demonstracao com tres modulos de raciocinio visual:
 
 - **LogicRAG**: usa uma base de conhecimento pre-computada do KITTI, traduz factos em First-Order Logic para linguagem natural e envia o contexto para um agente IAedu.
 - **LLaVA-SpaceSGG**: envia uma imagem real para a API IAedu e recebe uma descricao estruturada com objetos, caixas, relacoes espaciais, camadas de profundidade e perguntas/respostas comparativas.
+- **VisuLogic**: integra o codigo oficial de avaliacao do benchmark VisuLogic para testar raciocinio visual em modelos multimodais.
 
-Ambos os fluxos podem correr de duas formas, escolhidas pela variavel `LLM_BACKEND`:
+Os fluxos LogicRAG e LLaVA-SpaceSGG podem correr de duas formas, escolhidas pela variavel `LLM_BACKEND`:
 
 - `iaedu` (predefinicao): envia o pedido para a API IAedu na nuvem.
 - `ollama`: corre um modelo local atraves do Ollama (`llama3` para texto, `llava` para visao), sem internet nem chave de API.
@@ -27,6 +28,10 @@ O objetivo do repositorio e deixar um fluxo reproduzivel para demonstracao, scre
 |   +-- dataset_pipeline/stage2/visualize_layers.py
 |   +-- images_real/
 |   +-- README.md
++-- VisuLogic/
+|   +-- README.md
+|   +-- resultados/
+|   +-- VisuLogic-Eval/
 +-- .gitignore
 ```
 
@@ -199,6 +204,48 @@ Notas:
 - O modelo local `llava` da uma descricao mais solta e nao garante o formato estruturado de boxes 0-999 como a IAedu, por isso o resultado nao e identico ao da nuvem.
 - Em maquinas com pouca RAM, usar modelos mais leves (ex. `OLLAMA_MODEL=llama3.2:3b`).
 
+## Modulo 3: VisuLogic
+
+O VisuLogic fica em:
+
+```text
+VisuLogic/
+```
+
+Este modulo usa o codigo oficial de avaliacao do benchmark VisuLogic. O dataset completo e os outputs locais nao devem ser enviados para o GitHub.
+
+Tambem foi acrescentado um adaptador `ollama:llava`, permitindo avaliar o benchmark com o modelo multimodal local do Ollama.
+
+Preparar ambiente:
+
+```powershell
+cd .\VisuLogic\VisuLogic-Eval
+conda create -n visulogic python=3.10 -y
+conda activate visulogic
+python -m pip install -r requirements.txt
+```
+
+Testes rapidos:
+
+```powershell
+python -m py_compile .\evaluation\eval_model.py .\models\__init__.py
+python .\evaluation\eval_model.py --help
+```
+
+Exemplo de avaliacao local com Ollama:
+
+```powershell
+$env:OLLAMA_TIMEOUT="900"
+python .\evaluation\eval_model.py --input_file .\data.jsonl --output_file .\outputs\ollama_llava_visulogic.jsonl --model_path ollama:llava --base_url "http://localhost:11434/api/generate"
+Remove-Item Env:\OLLAMA_TIMEOUT
+```
+
+Ver instrucoes completas em:
+
+```text
+VisuLogic/README.md
+```
+
 ## Verificacao Antes de Commit
 
 Antes de fazer commit, confirmar o estado do repositorio:
@@ -227,6 +274,7 @@ Screenshots uteis:
 - Execucao de `python .\parse_kb_to_csv.py`.
 - Execucao de `python .\driving_agent.py` com a resposta do agente.
 - Execucao de `run_iaedu_image.py` e visualizacao do JSON.
+- Estrutura e comandos do modulo `VisuLogic`.
 - GitHub com o commit de documentacao.
 
 Nunca colocar chaves reais da API em screenshots, slides ou commits.

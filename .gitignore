@@ -21,3 +21,10 @@ __pycache__/
 __MACOSX/
 
 CONTEXTO.md
+
+# Dados e outputs locais do VisuLogic
+VisuLogic/VisuLogic-Eval/data.jsonl
+VisuLogic/VisuLogic-Eval/images/
+VisuLogic/VisuLogic-Eval/outputs/
+VisuLogic/resultados/*
+!VisuLogic/resultados/.gitkeep
