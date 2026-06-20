@@ -1,0 +1,7 @@
+{
+    "id": "demo_001",
+    "backend": "ollama",
+    "question": "Please determine whether the following action is valid (True/False/Unknown) based on the image and context: The driver should change lanes now.",
+    "gold_answer": "False",
+    "model_answer": "1. Premises relevant to the image:\n* Driving straight is allowed.\n* There is no road construction.\n2. Reasoning type: Modus Ponens / Modus Tollens\n3. Applying the logical rules:\n* If driving straight is allowed and there is no road construction, then it can be concluded that the driver should not change lanes now. (from premises 1 and 2)\n4. Final answer: False"
+}
