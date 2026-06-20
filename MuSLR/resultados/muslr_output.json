@@ -1,0 +1,7 @@
+{
+    "id": "demo_001",
+    "backend": "iaedu",
+    "question": "Please determine whether the following action is valid (True/False/Unknown) based on the image and context: The driver should change lanes now.",
+    "gold_answer": "False",
+    "model_answer": "1. Relevant premises from the context:\n\n$$\n\\text{DrivingStraightAllowed} \\rightarrow \\neg \\text{RoadConstruction}\n$$\n\n$$\n\\neg \\text{ParkingSign} \\rightarrow (\\text{ShouldGoStraight} \\lor \\text{MustChangeLane})\n$$\n\n$$\n(\\text{TwoWayRoad} \\land \\text{OneLanePerDirection} \\land \\text{MustChangeLane}) \\rightarrow \\text{MustWaitForOpposingVehicles}\n$$\n\n2. Reasoning type:\n\nThis requires propositional / first-order rule application, mainly Modus Ponens. However, the image evidence needed to establish facts such as whether there is a parking sign, road construction, a two-way road, or opposing vehicles is not available here.\n\n3. Logical application:\n\nNo premise directly states:\n\n$$\n\\text{MustChangeLaneNow}\n$$\n\nEven if the driver must change lanes, the context says that on a two-way road with one lane per direction, the driver must wait for opposing vehicles before changing lanes:\n\n$$\n\\text{MustChangeLane} \\rightarrow \\text{MustWaitForOpposingVehicles}\n$$\n\nBut without the image facts, we cannot confirm whether changing lanes is required or whether it is safe to do so now.\n\nTherefore, the validity of the action “The driver should change lanes now” cannot be determined from the provided context alone.\n\nFINAL ANSWER: Unknown"
+}
