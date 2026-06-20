@@ -28,3 +28,20 @@ VisuLogic/VisuLogic-Eval/images/
 VisuLogic/VisuLogic-Eval/outputs/
 VisuLogic/resultados/*
 !VisuLogic/resultados/.gitkeep
+.DS_Store
+
+# Dados e outputs locais do MuSLR
+MuSLR/data/*.png
+MuSLR/data/images/
+MuSLR/MuSLR-Code/data/
+MuSLR/MuSLR-Code/results/
+MuSLR/resultados/*
+!MuSLR/resultados/.gitkeep
+
+# Dados e outputs locais do MuSLR
+MuSLR/data/*.png
+MuSLR/data/images/
+MuSLR/MuSLR-Code/data/
+MuSLR/MuSLR-Code/results/
+MuSLR/resultados/*
+!MuSLR/resultados/.gitkeep
